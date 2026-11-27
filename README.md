@@ -44,8 +44,6 @@ All anime entries, watchlist statuses, preferences, and poster images live local
 
 ## 📸 Screenshots
 
-> Note: Replace the placeholder URLs below with actual application screenshots.
-
 <table align="center">
   <tr>
     <td align="center">
@@ -62,10 +60,10 @@ All anime entries, watchlist statuses, preferences, and poster images live local
     </td>
   </tr>
   <tr>
-    <td align="center"><sub><b>Home</b></sub></td>
-    <td align="center"><sub><b>Seasons</b></sub></td>
-    <td align="center"><sub><b>Schedule</b></sub></td>
-    <td align="center"><sub><b>Settings</b></sub></td>
+    <td align="center"><b>Home</b></td>
+    <td align="center"><b>Seasons</b></td>
+    <td align="center"><b>Schedule</b></td>
+    <td align="center"><b>Settings</b></td>
   </tr>
 </table>
 
