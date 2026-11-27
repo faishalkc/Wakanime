@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../../database/anime_dao.dart';
 import '../../models/anime.dart';
 import '../../models/watchlist.dart';
+import '../../services/season_import_service.dart';
+import '../../services/tenrai_provider.dart';
 import '../../widgets/anime_card.dart';
 import '../../widgets/anime_search_field.dart';
 import '../../widgets/empty_state.dart';
@@ -23,6 +25,7 @@ class SeasonsScreen extends StatefulWidget {
 
 class _SeasonsScreenState extends State<SeasonsScreen> {
   final _animeDao = AnimeDao();
+  final _importService = SeasonImportService();
   final _searchController = TextEditingController();
 
   late String _currentSeason;
@@ -32,6 +35,8 @@ class _SeasonsScreenState extends State<SeasonsScreen> {
   List<Anime> _seasonalAnime = [];
   Map<int, Watchlist> _watchlistMap = {};
   bool _isLoading = true;
+  bool _isImporting = false;
+  String _importStatus = '';
 
   @override
   void initState() {
@@ -91,11 +96,84 @@ class _SeasonsScreenState extends State<SeasonsScreen> {
   }
 
   void _onSeasonChanged(String newSeason, int newYear) {
+    if (_isImporting) return;
     setState(() {
       _currentSeason = newSeason;
       _currentYear = newYear;
     });
     _loadData();
+  }
+
+  String _formatSeasonLabel(String season, int year) {
+    final cap = season[0].toUpperCase() + season.substring(1).toLowerCase();
+    return '$cap $year';
+  }
+
+  Future<void> _importFromApi() async {
+    if (_isImporting) return;
+
+    final targetSeason = _currentSeason;
+    final targetYear = _currentYear;
+    final seasonLabel = _formatSeasonLabel(targetSeason, targetYear);
+
+    setState(() {
+      _isImporting = true;
+      _importStatus = 'Importing $seasonLabel...';
+    });
+
+    try {
+      final result = await _importService.importSeason(
+        season: targetSeason,
+        year: targetYear,
+        onProgress: (status) {
+          if (mounted) {
+            setState(() {
+              _importStatus = status;
+            });
+          }
+        },
+      );
+
+      if (!mounted) return;
+      await _loadData();
+      if (!mounted) return;
+
+      final String message;
+      if (result.totalProcessed == 0) {
+        message = 'No anime found for $seasonLabel.';
+      } else if (result.failedImageCount > 0) {
+        message =
+            'Imported ${result.totalProcessed} anime (${result.insertedCount} new, ${result.updatedCount} updated), but ${result.failedImageCount} image(s) are unavailable.';
+      } else {
+        message =
+            'Imported ${result.totalProcessed} anime for $seasonLabel (${result.insertedCount} new, ${result.updatedCount} updated).';
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message)),
+      );
+    } on ImportException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.message)),
+        );
+      }
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Import failed. Existing data was not changed.'),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isImporting = false;
+          _importStatus = '';
+        });
+      }
+    }
   }
 
   void _onSearchChanged(String query) {
@@ -162,12 +240,78 @@ class _SeasonsScreenState extends State<SeasonsScreen> {
             child: Column(
               children: [
                 // Season Navigation Selector (← Season Year →)
-                SeasonSelector(
-                  season: _currentSeason,
-                  year: _currentYear,
-                  onSeasonChanged: _onSeasonChanged,
+                Opacity(
+                  opacity: _isImporting ? 0.6 : 1.0,
+                  child: AbsorbPointer(
+                    absorbing: _isImporting,
+                    child: SeasonSelector(
+                      season: _currentSeason,
+                      year: _currentYear,
+                      onSeasonChanged: _onSeasonChanged,
+                    ),
+                  ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 10),
+                // Action Buttons: Add Anime & Import from API
+                Row(
+                  children: [
+                    Expanded(
+                      child: FilledButton.tonalIcon(
+                        onPressed: _isImporting ? null : _navigateToAddAnime,
+                        icon: const Icon(Icons.add, size: 18),
+                        label: const Text('Add Anime'),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: _isImporting ? null : _importFromApi,
+                        icon: const Icon(Icons.download, size: 18),
+                        label: Text(
+                          _isImporting ? 'Importing...' : 'Import from API',
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                if (_isImporting) ...[
+                  const SizedBox(height: 10),
+                  Card(
+                    elevation: 0,
+                    color: theme.colorScheme.surfaceContainerHighest
+                        .withValues(alpha: 0.5),
+                    margin: EdgeInsets.zero,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 10,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Importing ${_formatSeasonLabel(_currentSeason, _currentYear)}...',
+                            style: theme.textTheme.labelLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          if (_importStatus.isNotEmpty) ...[
+                            const SizedBox(height: 4),
+                            Text(
+                              _importStatus,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
+                          const SizedBox(height: 8),
+                          const LinearProgressIndicator(),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 10),
                 // Search Field
                 AnimeSearchField(
                   controller: _searchController,
@@ -248,7 +392,7 @@ class _SeasonsScreenState extends State<SeasonsScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _navigateToAddAnime,
+        onPressed: _isImporting ? null : _navigateToAddAnime,
         tooltip: 'Add Anime',
         child: const Icon(Icons.add),
       ),

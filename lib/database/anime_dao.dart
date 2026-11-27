@@ -1,8 +1,33 @@
 import 'package:sqflite/sqflite.dart';
 import '../models/anime.dart';
+import '../models/anime_import_data.dart';
 import '../models/watchlist.dart';
 import '../services/image_service.dart';
 import 'database.dart';
+
+class ImportBatchEntry {
+  final AnimeImportData data;
+  final String? stagedImagePath;
+
+  const ImportBatchEntry({
+    required this.data,
+    this.stagedImagePath,
+  });
+}
+
+class UpsertSeasonResult {
+  final int insertedCount;
+  final int updatedCount;
+  final int failedImageSaveCount;
+
+  const UpsertSeasonResult({
+    required this.insertedCount,
+    required this.updatedCount,
+    required this.failedImageSaveCount,
+  });
+
+  int get totalProcessed => insertedCount + updatedCount;
+}
 
 class AnimeDao {
   final AppDatabase _dbProvider;
@@ -177,6 +202,8 @@ class AnimeDao {
         a.release_day AS a_release_day,
         a.release_time AS a_release_time,
         a.platform AS a_platform,
+        a.source AS a_source,
+        a.external_id AS a_external_id,
         a.created_at AS a_created_at,
         a.updated_at AS a_updated_at
       FROM watchlist w
@@ -197,6 +224,8 @@ class AnimeDao {
         releaseDay: row['a_release_day'] as String?,
         releaseTime: row['a_release_time'] as String?,
         platform: row['a_platform'] as String?,
+        source: row['a_source'] as String?,
+        externalId: row['a_external_id']?.toString(),
         createdAt: row['a_created_at'] as String? ?? '',
         updatedAt: row['a_updated_at'] as String? ?? '',
       );
@@ -217,6 +246,138 @@ class AnimeDao {
     final db = await _db;
     final result = await db.rawQuery('SELECT COUNT(*) as count FROM watchlist');
     return Sqflite.firstIntValue(result) ?? 0;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Atomic API Season Import Upsert
+  // ---------------------------------------------------------------------------
+
+  /// Atomically upserts imported anime in a single SQLite transaction.
+  /// Preserves existing local-only fields (`platform`) and never modifies `watchlist`.
+  Future<UpsertSeasonResult> upsertImportedSeason(
+    List<ImportBatchEntry> entries, {
+    Future<String> Function(int animeId, String stagedPath)? saveStagedImage,
+    Future<void> Function(String? path)? deleteImage,
+  }) async {
+    final db = await _db;
+    final saveImg = saveStagedImage ?? ImageService.instance.saveImageForAnime;
+    final deleteImg = deleteImage ?? ImageService.instance.deleteImage;
+
+    final createdFinalPaths = <String>[];
+    final oldImagesToDelete = <String>[];
+    int insertedCount = 0;
+    int updatedCount = 0;
+    int failedImageSaveCount = 0;
+
+    try {
+      await db.transaction((txn) async {
+        final now = DateTime.now().toIso8601String();
+
+        for (final entry in entries) {
+          final data = entry.data;
+          final existingRows = await txn.query(
+            'anime',
+            columns: ['id', 'image_path'],
+            where: 'source = ? AND external_id = ?',
+            whereArgs: [data.source, data.externalId],
+            limit: 1,
+          );
+
+          if (existingRows.isNotEmpty) {
+            final animeId = existingRows.first['id'] as int;
+            final oldImagePath = existingRows.first['image_path'] as String?;
+
+            String? newImagePath;
+            if (entry.stagedImagePath != null) {
+              try {
+                newImagePath = await saveImg(animeId, entry.stagedImagePath!);
+                createdFinalPaths.add(newImagePath);
+              } catch (_) {
+                failedImageSaveCount++;
+                newImagePath = null;
+              }
+            }
+
+            final updateValues = <String, dynamic>{
+              'title': data.title,
+              'season': data.season.toLowerCase(),
+              'season_year': data.seasonYear,
+              'release_day': data.releaseDay,
+              'release_time': data.releaseTime,
+              'updated_at': now,
+            };
+
+            // Only replace image_path if new image was saved successfully;
+            // otherwise preserve existing image_path.
+            if (newImagePath != null) {
+              updateValues['image_path'] = newImagePath;
+              if (oldImagePath != null &&
+                  oldImagePath.isNotEmpty &&
+                  oldImagePath != newImagePath) {
+                oldImagesToDelete.add(oldImagePath);
+              }
+            }
+
+            // Never touch `platform` or `watchlist` on re-import.
+            await txn.update(
+              'anime',
+              updateValues,
+              where: 'id = ?',
+              whereArgs: [animeId],
+            );
+            updatedCount++;
+          } else {
+            final animeId = await txn.insert('anime', {
+              'title': data.title,
+              'image_path': null,
+              'season': data.season.toLowerCase(),
+              'season_year': data.seasonYear,
+              'release_day': data.releaseDay,
+              'release_time': data.releaseTime,
+              'platform': data.platform,
+              'source': data.source,
+              'external_id': data.externalId,
+              'created_at': now,
+              'updated_at': now,
+            });
+
+            if (entry.stagedImagePath != null) {
+              try {
+                final savedPath = await saveImg(animeId, entry.stagedImagePath!);
+                createdFinalPaths.add(savedPath);
+                await txn.update(
+                  'anime',
+                  {'image_path': savedPath},
+                  where: 'id = ?',
+                  whereArgs: [animeId],
+                );
+              } catch (_) {
+                failedImageSaveCount++;
+              }
+            }
+
+            insertedCount++;
+          }
+        }
+      });
+
+      // Delete old replaced images only after SQLite transaction committed.
+      for (final oldPath in oldImagesToDelete) {
+        await deleteImg(oldPath);
+      }
+
+      return UpsertSeasonResult(
+        insertedCount: insertedCount,
+        updatedCount: updatedCount,
+        failedImageSaveCount: failedImageSaveCount,
+      );
+    } catch (_) {
+      // Roll back filesystem changes if SQLite transaction failed.
+      for (final createdPath in createdFinalPaths) {
+        await deleteImg(createdPath);
+      }
+      rethrow;
+    }
   }
 
   // ---------------------------------------------------------------------------

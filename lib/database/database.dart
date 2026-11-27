@@ -19,12 +19,13 @@ class AppDatabase {
 
     return await openDatabase(
       path,
-      version: 1,
+      version: 2,
       onConfigure: (db) async {
         // Enable SQLite foreign keys cascade
         await db.execute('PRAGMA foreign_keys = ON;');
       },
       onCreate: _createDB,
+      onUpgrade: _upgradeDB,
     );
   }
 
@@ -40,9 +41,17 @@ class AppDatabase {
         release_day TEXT,
         release_time TEXT,
         platform TEXT,
+        source TEXT,
+        external_id TEXT,
         created_at TEXT NOT NULL,
         updated_at TEXT NOT NULL
       );
+    ''');
+
+    await db.execute('''
+      CREATE UNIQUE INDEX idx_anime_source_external_id
+      ON anime (source, external_id)
+      WHERE source IS NOT NULL AND external_id IS NOT NULL;
     ''');
 
     // Watchlist table (anime_id is UNIQUE, single record per anime)
@@ -64,6 +73,18 @@ class AppDatabase {
         value TEXT
       );
     ''');
+  }
+
+  Future<void> _upgradeDB(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      await db.execute('ALTER TABLE anime ADD COLUMN source TEXT;');
+      await db.execute('ALTER TABLE anime ADD COLUMN external_id TEXT;');
+      await db.execute('''
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_anime_source_external_id
+        ON anime (source, external_id)
+        WHERE source IS NOT NULL AND external_id IS NOT NULL;
+      ''');
+    }
   }
 
   Future<void> close() async {

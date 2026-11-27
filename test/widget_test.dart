@@ -15,6 +15,8 @@ void main() {
         releaseDay: 'Friday',
         releaseTime: '23:00',
         platform: 'Crunchyroll',
+        source: 'tenrai',
+        externalId: '52991',
         createdAt: now,
         updatedAt: now,
       );
@@ -28,6 +30,8 @@ void main() {
       expect(map['release_day'], 'Friday');
       expect(map['release_time'], '23:00');
       expect(map['platform'], 'Crunchyroll');
+      expect(map['source'], 'tenrai');
+      expect(map['external_id'], '52991');
 
       final fromMap = Anime.fromMap(map);
       expect(fromMap.id, anime.id);
@@ -35,6 +39,8 @@ void main() {
       expect(fromMap.imagePath, anime.imagePath);
       expect(fromMap.season, anime.season);
       expect(fromMap.seasonYear, anime.seasonYear);
+      expect(fromMap.source, 'tenrai');
+      expect(fromMap.externalId, '52991');
       expect(fromMap.seasonDisplay, 'Fall 2023');
     });
 

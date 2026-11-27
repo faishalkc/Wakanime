@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as p;
@@ -71,6 +73,54 @@ class ImageService {
     await deleteImage(oldImagePath);
     // Save new image file
     return await saveImageForAnime(animeId, newSourcePath);
+  }
+
+  /// Downloads an image URL to a temporary staging directory.
+  /// Returns the staged file path, or null if download fails.
+  Future<String?> downloadToStaging({
+    required String imageUrl,
+    required Directory stagingDir,
+    required String fileKey,
+  }) async {
+    final uri = Uri.tryParse(imageUrl);
+    if (uri == null || (!uri.isScheme('http') && !uri.isScheme('https'))) {
+      return null;
+    }
+
+    final client = HttpClient()..connectionTimeout = const Duration(seconds: 10);
+    try {
+      final request = await client.getUrl(uri).timeout(
+        const Duration(seconds: 10),
+      );
+      request.headers.set(HttpHeaders.userAgentHeader, 'Wakanime/1.0');
+
+      final response = await request.close().timeout(
+        const Duration(seconds: 15),
+      );
+      if (response.statusCode != 200) {
+        return null;
+      }
+
+      final bytesBuilder = BytesBuilder(copy: false);
+      await for (final chunk in response.timeout(const Duration(seconds: 15))) {
+        bytesBuilder.add(chunk);
+      }
+      final bytes = bytesBuilder.takeBytes();
+      if (bytes.isEmpty) return null;
+
+      final rawExt = p.extension(uri.path).toLowerCase();
+      final ext = (rawExt == '.jpg' || rawExt == '.jpeg' || rawExt == '.png' || rawExt == '.webp')
+          ? rawExt
+          : '.jpg';
+
+      final stagedFile = File(p.join(stagingDir.path, '$fileKey$ext'));
+      await stagedFile.writeAsBytes(bytes, flush: true);
+      return stagedFile.path;
+    } catch (_) {
+      return null;
+    } finally {
+      client.close();
+    }
   }
 
   /// Safe widget builder for anime images, showing an elegant placeholder on missing/invalid files

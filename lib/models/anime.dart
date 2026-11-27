@@ -7,6 +7,8 @@ class Anime {
   final String? releaseDay;
   final String? releaseTime;
   final String? platform;
+  final String? source;
+  final String? externalId;
   final String createdAt;
   final String updatedAt;
 
@@ -19,6 +21,8 @@ class Anime {
     this.releaseDay,
     this.releaseTime,
     this.platform,
+    this.source,
+    this.externalId,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -57,6 +61,8 @@ class Anime {
       'release_day': releaseDay,
       'release_time': releaseTime,
       'platform': platform,
+      'source': source,
+      'external_id': externalId,
       'created_at': createdAt,
       'updated_at': updatedAt,
     };
@@ -72,6 +78,8 @@ class Anime {
       releaseDay: map['release_day'] as String?,
       releaseTime: map['release_time'] as String?,
       platform: map['platform'] as String?,
+      source: map['source'] as String?,
+      externalId: map['external_id']?.toString(),
       createdAt: map['created_at'] as String? ?? DateTime.now().toIso8601String(),
       updatedAt: map['updated_at'] as String? ?? DateTime.now().toIso8601String(),
     );
@@ -87,6 +95,8 @@ class Anime {
     String? releaseDay,
     String? releaseTime,
     String? platform,
+    String? source,
+    String? externalId,
     String? createdAt,
     String? updatedAt,
   }) {
@@ -99,6 +109,8 @@ class Anime {
       releaseDay: releaseDay ?? this.releaseDay,
       releaseTime: releaseTime ?? this.releaseTime,
       platform: platform ?? this.platform,
+      source: source ?? this.source,
+      externalId: externalId ?? this.externalId,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );
