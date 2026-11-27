@@ -1,6 +1,6 @@
-<p align="center">
-  <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhbaBm-O5hk3eZqPA_J9oVosFHloaQVhFSVPY4BdMcPSAT9V3eH35SiKr365BnCxqVco7QWpO7ZTNYmbKW3IOus5aW2WvO1UJq68kO_Ger68pzweuIyef712d4EMxSt5PvsGrHhJqmtgxefCCZ9BPf_yP4hwet5Xdq8Y9HL3QbUfGXcyv7-CuCRW5PegYc/s512/155465.png" alt="Wakanime App Icon" width="160">
-</p>
+<div align="center">
+  <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhbaBm-O5hk3eZqPA_J9oVosFHloaQVhFSVPY4BdMcPSAT9V3eH35SiKr365BnCxqVco7QWpO7ZTNYmbKW3IOus5aW2WvO1UJq68kO_Ger68pzweuIyef712d4EMxSt5PvsGrHhJqmtgxefCCZ9BPf_yP4hwet5Xdq8Y9HL3QbUfGXcyv7-CuCRW5PegYc/s512/155465.png" alt="Wakanime App Icon" width="160" height="160">
+</div>
 
 <h1 align="center">Wakanime</h1>
 
@@ -44,8 +44,6 @@ All anime entries, watchlist statuses, preferences, and poster images live local
 
 ## 📸 Screenshots
 
-> Note: Replace the placeholder URLs below with actual application screenshots.
-
 <table align="center">
   <tr>
     <td align="center">
@@ -62,10 +60,10 @@ All anime entries, watchlist statuses, preferences, and poster images live local
     </td>
   </tr>
   <tr>
-    <td align="center"><sub><b>Home</b></sub></td>
-    <td align="center"><sub><b>Seasons</b></sub></td>
-    <td align="center"><sub><b>Schedule</b></sub></td>
-    <td align="center"><sub><b>Settings</b></sub></td>
+    <td align="center"><b>Home</b></td>
+    <td align="center"><b>Seasons</b></td>
+    <td align="center"><b>Schedule</b></td>
+    <td align="center"><b>Settings</b></td>
   </tr>
 </table>
 
