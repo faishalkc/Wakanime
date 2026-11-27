@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://placehold.co/160x160" alt="Wakanime App Icon" width="160">
+  <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhbaBm-O5hk3eZqPA_J9oVosFHloaQVhFSVPY4BdMcPSAT9V3eH35SiKr365BnCxqVco7QWpO7ZTNYmbKW3IOus5aW2WvO1UJq68kO_Ger68pzweuIyef712d4EMxSt5PvsGrHhJqmtgxefCCZ9BPf_yP4hwet5Xdq8Y9HL3QbUfGXcyv7-CuCRW5PegYc/s512/155465.png" alt="Wakanime App Icon" width="160">
 </p>
 
 <h1 align="center">Wakanime</h1>
@@ -49,16 +49,16 @@ All anime entries, watchlist statuses, preferences, and poster images live local
 <table align="center">
   <tr>
     <td align="center">
-      <img src="https://placehold.co/300x600" alt="Home Screen" width="200">
+      <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiD93isCyngxkZtj2RnDu2jo6doWiDplAsBA3BMdaBnicXFeeqA2xVrB1n71nCrANmjWJknWxn_XtOSEtEaFE1C7UOaTSOshP7ZFzcndlrU9GzfdyL0vgKdr-zLZXzWRaZoHFLnnYjB9_hkLUWUdwOeMOMgCJhEQ7I6ouETWiEdiX4JhHEv-XrAfkxCi2s/s1024/158195.png" alt="Home Screen" width="200">
     </td>
     <td align="center">
-      <img src="https://placehold.co/300x600" alt="Seasons Screen" width="200">
+      <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEip9aZyiRXdqEebtafKrtrQcGWjfw4tLUBiz-qCIYk33d286cdgcj521UHou6_0mV3qa6pcCRlivzWGPPWp5QB3qu4ysBGHK6yvTTuVdYtRGdKzPreFga83RpNIUve_3QlhsoaVPpPDWBSOAQzn-OJh_A7BcYVdDQT1mdJIOF_2kJ2R-yGQAw0Bt4-6tn4/s1024/158196.png" alt="Seasons Screen" width="200">
     </td>
     <td align="center">
-      <img src="https://placehold.co/300x600" alt="Schedule Screen" width="200">
+      <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhWE9QIKedZ1ap0RPbpAL1HY9uHA9w_tSvQsf6_rITrHS6_333ci5M3xdZEN3fWNHRZqEXKMvX_MvNR83Z17UAvHWoNfNeBSrP4DgzpcSd0n7F1FP-QTWiYgrV6qg8GDbIlxoa9p2LUrn-gpSNJTnOkdP-EXuWDH_YhORRz1vOMgMECIccgmUH1TIiHwnk/s1024/158197.jpg" alt="Schedule Screen" width="200">
     </td>
     <td align="center">
-      <img src="https://placehold.co/300x600" alt="Settings Screen" width="200">
+      <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgrbRRBC3IgdDmwaYnBJNavxCS7FJrmx7xYpH_HF44PbqZvmPq6YaihdU7NRtPtOOVVgEDjsXAfVIuRzxlC6Z1Q-hHZpDvjULMAgn25YVdV3Q1rSxP58yopUcl0adPOR_qnp6xncERlJwRv3HvZBCjndWwt3fHTDYn-7xsRMZbP2DKAIv0HeFDIDp1eQ9M/s1024/158198.png" alt="Settings Screen" width="200">
     </td>
   </tr>
   <tr>
@@ -223,11 +223,5 @@ Contributions are welcome! Please review [CONTRIBUTING.md](CONTRIBUTING.md) and 
 
 ## 📄 License
 
-This project is licensed under the MIT License — see [LICENSE](LICENSE) for details.
-
----
-
-<p align="center">
-  Made with Flutter and a love for anime. 🌸<br>
-  Licensed under the MIT License.
-</p>
+This project is licensed under the MIT License — see [LICENSE](LICENSE) for details.<br>
+Made with Flutter and a love for anime. 🌸
