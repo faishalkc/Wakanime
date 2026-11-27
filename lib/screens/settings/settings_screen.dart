@@ -3,10 +3,12 @@ import '../../database/anime_dao.dart';
 
 class SettingsScreen extends StatefulWidget {
   final ValueNotifier<ThemeMode> themeModeNotifier;
+  final int refreshTick;
 
   const SettingsScreen({
     super.key,
     required this.themeModeNotifier,
+    this.refreshTick = 0,
   });
 
   @override
@@ -24,6 +26,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void initState() {
     super.initState();
     _loadStats();
+  }
+
+  @override
+  void didUpdateWidget(covariant SettingsScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.refreshTick != oldWidget.refreshTick) {
+      _loadStats();
+    }
   }
 
   Future<void> _loadStats() async {

@@ -156,57 +156,34 @@ class AnimeDao {
 
   Future<List<WatchlistItem>> getWatchlistItems({String? status}) async {
     final db = await _db;
-    final String query;
-    final List<dynamic> args;
+    final hasStatusFilter =
+        status != null && status.isNotEmpty && status.toLowerCase() != 'all';
 
-    if (status != null && status.isNotEmpty && status.toLowerCase() != 'all') {
-      query = '''
-        SELECT 
-          w.id AS w_id,
-          w.anime_id AS w_anime_id,
-          w.status AS w_status,
-          w.created_at AS w_created_at,
-          w.updated_at AS w_updated_at,
-          a.id AS a_id,
-          a.title AS a_title,
-          a.image_path AS a_image_path,
-          a.season AS a_season,
-          a.season_year AS a_season_year,
-          a.release_day AS a_release_day,
-          a.release_time AS a_release_time,
-          a.platform AS a_platform,
-          a.created_at AS a_created_at,
-          a.updated_at AS a_updated_at
-        FROM watchlist w
-        INNER JOIN anime a ON w.anime_id = a.id
-        WHERE w.status = ?
-        ORDER BY w.updated_at DESC
-      ''';
-      args = [status.toLowerCase()];
-    } else {
-      query = '''
-        SELECT 
-          w.id AS w_id,
-          w.anime_id AS w_anime_id,
-          w.status AS w_status,
-          w.created_at AS w_created_at,
-          w.updated_at AS w_updated_at,
-          a.id AS a_id,
-          a.title AS a_title,
-          a.image_path AS a_image_path,
-          a.season AS a_season,
-          a.season_year AS a_season_year,
-          a.release_day AS a_release_day,
-          a.release_time AS a_release_time,
-          a.platform AS a_platform,
-          a.created_at AS a_created_at,
-          a.updated_at AS a_updated_at
-        FROM watchlist w
-        INNER JOIN anime a ON w.anime_id = a.id
-        ORDER BY w.updated_at DESC
-      ''';
-      args = [];
-    }
+    final whereClause = hasStatusFilter ? 'WHERE w.status = ?' : '';
+    final args = hasStatusFilter ? <dynamic>[status.toLowerCase()] : <dynamic>[];
+
+    final query = '''
+      SELECT 
+        w.id AS w_id,
+        w.anime_id AS w_anime_id,
+        w.status AS w_status,
+        w.created_at AS w_created_at,
+        w.updated_at AS w_updated_at,
+        a.id AS a_id,
+        a.title AS a_title,
+        a.image_path AS a_image_path,
+        a.season AS a_season,
+        a.season_year AS a_season_year,
+        a.release_day AS a_release_day,
+        a.release_time AS a_release_time,
+        a.platform AS a_platform,
+        a.created_at AS a_created_at,
+        a.updated_at AS a_updated_at
+      FROM watchlist w
+      INNER JOIN anime a ON w.anime_id = a.id
+      $whereClause
+      ORDER BY a.title COLLATE NOCASE ASC
+    ''';
 
     final rows = await db.rawQuery(query, args);
 

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../screens/home/home_screen.dart';
+import '../screens/schedule/schedule_screen.dart';
+import '../screens/seasons/seasons_screen.dart';
 import '../screens/settings/settings_screen.dart';
-import '../screens/watchlist/watchlist_screen.dart';
 import 'routes.dart';
 
 class WakanimeApp extends StatelessWidget {
@@ -123,10 +124,12 @@ class MainNavigationShell extends StatefulWidget {
 
 class _MainNavigationShellState extends State<MainNavigationShell> {
   int _currentIndex = 0;
+  final List<int> _tabRefreshTicks = [0, 0, 0, 0];
 
   void _onTabTapped(int index) {
     setState(() {
       _currentIndex = index;
+      _tabRefreshTicks[index]++;
     });
   }
 
@@ -134,10 +137,19 @@ class _MainNavigationShellState extends State<MainNavigationShell> {
   Widget build(BuildContext context) {
     final screens = [
       HomeScreen(
-        onNavigateToWatchlist: () => _onTabTapped(1),
+        onNavigateToSeasons: () => _onTabTapped(1),
+        refreshTick: _tabRefreshTicks[0],
       ),
-      const WatchlistScreen(),
-      SettingsScreen(themeModeNotifier: widget.themeModeNotifier),
+      SeasonsScreen(
+        refreshTick: _tabRefreshTicks[1],
+      ),
+      ScheduleScreen(
+        refreshTick: _tabRefreshTicks[2],
+      ),
+      SettingsScreen(
+        themeModeNotifier: widget.themeModeNotifier,
+        refreshTick: _tabRefreshTicks[3],
+      ),
     ];
 
     return Scaffold(
@@ -155,9 +167,14 @@ class _MainNavigationShellState extends State<MainNavigationShell> {
             label: 'Home',
           ),
           NavigationDestination(
-            icon: Icon(Icons.playlist_play_outlined),
-            selectedIcon: Icon(Icons.playlist_play),
-            label: 'Watchlist',
+            icon: Icon(Icons.calendar_month_outlined),
+            selectedIcon: Icon(Icons.calendar_month),
+            label: 'Seasons',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.schedule_outlined),
+            selectedIcon: Icon(Icons.schedule),
+            label: 'Schedule',
           ),
           NavigationDestination(
             icon: Icon(Icons.settings_outlined),

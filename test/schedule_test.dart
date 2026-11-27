@@ -1,0 +1,98 @@
+import 'package:flutter_test/flutter_test.dart';
+import 'package:wakanime/models/anime.dart';
+import 'package:wakanime/models/watchlist.dart';
+import 'package:wakanime/screens/schedule/schedule_screen.dart';
+
+WatchlistItem _makeItem({
+  required int id,
+  required String title,
+  String? releaseDay,
+  String? releaseTime,
+  String status = Watchlist.statusWatching,
+}) {
+  return WatchlistItem(
+    anime: Anime(
+      id: id,
+      title: title,
+      season: 'fall',
+      seasonYear: 2026,
+      releaseDay: releaseDay,
+      releaseTime: releaseTime,
+      createdAt: '2026-10-01',
+      updatedAt: '2026-10-01',
+    ),
+    watchlist: Watchlist(
+      id: id,
+      animeId: id,
+      status: status,
+      createdAt: '2026-10-01',
+      updatedAt: '2026-10-01',
+    ),
+  );
+}
+
+void main() {
+  group('Schedule Sorting & Grouping Tests', () {
+    test('parseReleaseTimeMinutes parses valid and invalid times safely', () {
+      expect(parseReleaseTimeMinutes('00:30'), 30);
+      expect(parseReleaseTimeMinutes('9:15'), 9 * 60 + 15);
+      expect(parseReleaseTimeMinutes('18:00'), 18 * 60);
+      expect(parseReleaseTimeMinutes('23:30'), 23 * 60 + 30);
+
+      // Missing or invalid times should return a large sentinel value without throwing
+      expect(parseReleaseTimeMinutes(null), greaterThan(24 * 60));
+      expect(parseReleaseTimeMinutes(''), greaterThan(24 * 60));
+      expect(parseReleaseTimeMinutes('invalid'), greaterThan(24 * 60));
+    });
+
+    test('buildWeeklySchedule orders days Monday to Sunday, not alphabetically', () {
+      final items = [
+        _makeItem(id: 1, title: 'Sunday Anime', releaseDay: 'Sunday', releaseTime: '10:00'),
+        _makeItem(id: 2, title: 'Friday Anime', releaseDay: 'Friday', releaseTime: '22:00'),
+        _makeItem(id: 3, title: 'Monday Anime', releaseDay: 'Monday', releaseTime: '18:00'),
+        _makeItem(id: 4, title: 'Tuesday Anime', releaseDay: 'Tuesday', releaseTime: '19:00'),
+        _makeItem(id: 5, title: 'Thursday Anime', releaseDay: 'Thursday', releaseTime: '21:00'),
+        _makeItem(id: 6, title: 'Wednesday Anime', releaseDay: 'Wednesday', releaseTime: '20:00'),
+        _makeItem(id: 7, title: 'Saturday Anime', releaseDay: 'Saturday', releaseTime: '23:00'),
+      ];
+
+      final schedule = buildWeeklySchedule(items);
+
+      expect(
+        schedule.map((d) => d.day).toList(),
+        ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+      );
+    });
+
+    test('buildWeeklySchedule sorts items chronologically within the same day', () {
+      final items = [
+        _makeItem(id: 1, title: 'Late Night', releaseDay: 'Monday', releaseTime: '23:30'),
+        _makeItem(id: 2, title: 'No Time', releaseDay: 'Monday', releaseTime: null),
+        _makeItem(id: 3, title: 'Evening', releaseDay: 'Monday', releaseTime: '18:00'),
+        _makeItem(id: 4, title: 'Morning Single Digit', releaseDay: 'Monday', releaseTime: '9:05'),
+        _makeItem(id: 5, title: 'Midnight', releaseDay: 'Monday', releaseTime: '00:30'),
+      ];
+
+      final schedule = buildWeeklySchedule(items);
+      expect(schedule.length, 1);
+      expect(
+        schedule.first.items.map((e) => e.anime.title).toList(),
+        ['Midnight', 'Morning Single Digit', 'Evening', 'Late Night', 'No Time'],
+      );
+    });
+
+    test('buildWeeklySchedule safely ignores items with null or empty releaseDay', () {
+      final items = [
+        _makeItem(id: 1, title: 'No Day', releaseDay: null, releaseTime: '18:00'),
+        _makeItem(id: 2, title: 'Empty Day', releaseDay: '  ', releaseTime: '19:00'),
+        _makeItem(id: 3, title: 'Valid Day', releaseDay: 'monday', releaseTime: '20:00'),
+      ];
+
+      final schedule = buildWeeklySchedule(items);
+      expect(schedule.length, 1);
+      expect(schedule.first.day, 'Monday');
+      expect(schedule.first.items.length, 1);
+      expect(schedule.first.items.first.anime.title, 'Valid Day');
+    });
+  });
+}
