@@ -138,6 +138,7 @@ class _InMemoryAnimeDao extends AnimeDao {
 Map<String, dynamic> _tenraiAnimeJson({
   required int malId,
   required String title,
+  String? type = 'TV',
   String? season = 'fall',
   int? year = 2026,
   String? day = 'Fridays',
@@ -147,6 +148,7 @@ Map<String, dynamic> _tenraiAnimeJson({
   return {
     'mal_id': malId,
     'title': title,
+    'type': ?type,
     'season': season,
     'year': year,
     'images': {
@@ -185,15 +187,15 @@ String _pagePayload({
 
 void main() {
   group('TenraiProvider Tests', () {
-    test('Fetches all pages sequentially and normalizes fields', () async {
-      final requestedPages = <String>[];
+    test('Uses ?type=tv & filter=tv, fetches all pages sequentially, and excludes non-TV', () async {
+      final requestedUris = <Uri>[];
       final progressMessages = <String>[];
 
       final provider = TenraiProvider(
         delay: (_) async {},
         httpGet: (uri) async {
+          requestedUris.add(uri);
           final page = uri.queryParameters['page'] ?? '1';
-          requestedPages.add(page);
           if (page == '1') {
             return HttpResponseData(
               statusCode: 200,
@@ -207,6 +209,11 @@ void main() {
                     title: 'Anime One',
                     day: 'Mondays',
                     time: '23:00',
+                  ),
+                  _tenraiAnimeJson(
+                    malId: 199,
+                    title: 'Non-TV Movie Should Be Skipped',
+                    type: 'Movie',
                   ),
                 ],
               ),
@@ -257,8 +264,13 @@ void main() {
         onProgress: progressMessages.add,
       );
 
-      expect(requestedPages, ['1', '2', '3']);
+      expect(requestedUris.map((u) => u.queryParameters['page']).toList(), ['1', '2', '3']);
+      for (final uri in requestedUris) {
+        expect(uri.queryParameters['type'], 'tv');
+        expect(uri.queryParameters['filter'], 'tv');
+      }
       expect(items.length, 3);
+      expect(items.any((e) => e.externalId == '199'), isFalse);
       expect(progressMessages, contains('Fetching page 1 of 3...'));
       expect(progressMessages, contains('Fetching page 2 of 3...'));
       expect(progressMessages, contains('Fetching page 3 of 3...'));

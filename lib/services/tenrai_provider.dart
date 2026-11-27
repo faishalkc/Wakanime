@@ -114,8 +114,13 @@ class TenraiProvider implements SeasonAnimeProvider {
     while (hasNextPage && currentPage <= _maxPagesSafetyLimit) {
       onProgress?.call('Fetching page $currentPage...');
 
-      final uri = Uri.parse('$_baseUrl/$year/$normalizedSeason')
-          .replace(queryParameters: {'page': currentPage.toString()});
+      final uri = Uri.parse('$_baseUrl/$year/$normalizedSeason').replace(
+        queryParameters: {
+          'type': 'tv',
+          'filter': 'tv',
+          'page': currentPage.toString(),
+        },
+      );
 
       final response = await _fetchPageWithRetry(uri);
 
@@ -228,6 +233,13 @@ class TenraiProvider implements SeasonAnimeProvider {
     required String fallbackSeason,
     required int fallbackYear,
   }) {
+    final rawType = item['type'];
+    if (rawType is String &&
+        rawType.trim().isNotEmpty &&
+        rawType.trim().toLowerCase() != 'tv') {
+      return null;
+    }
+
     final rawId = item['mal_id'];
     if (rawId == null) return null;
     final externalId = rawId.toString().trim();

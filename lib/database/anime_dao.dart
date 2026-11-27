@@ -179,13 +179,30 @@ class AnimeDao {
     );
   }
 
-  Future<List<WatchlistItem>> getWatchlistItems({String? status}) async {
+  Future<List<WatchlistItem>> getWatchlistItems({
+    String? status,
+    String? season,
+    int? seasonYear,
+  }) async {
     final db = await _db;
-    final hasStatusFilter =
-        status != null && status.isNotEmpty && status.toLowerCase() != 'all';
+    final conditions = <String>[];
+    final args = <dynamic>[];
 
-    final whereClause = hasStatusFilter ? 'WHERE w.status = ?' : '';
-    final args = hasStatusFilter ? <dynamic>[status.toLowerCase()] : <dynamic>[];
+    if (status != null && status.isNotEmpty && status.toLowerCase() != 'all') {
+      conditions.add('w.status = ?');
+      args.add(status.toLowerCase());
+    }
+    if (season != null && season.isNotEmpty) {
+      conditions.add('a.season = ?');
+      args.add(season.toLowerCase());
+    }
+    if (seasonYear != null) {
+      conditions.add('a.season_year = ?');
+      args.add(seasonYear);
+    }
+
+    final whereClause =
+        conditions.isEmpty ? '' : 'WHERE ${conditions.join(' AND ')}';
 
     final query = '''
       SELECT 

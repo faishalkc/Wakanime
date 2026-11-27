@@ -6,6 +6,8 @@ import 'package:wakanime/screens/schedule/schedule_screen.dart';
 WatchlistItem _makeItem({
   required int id,
   required String title,
+  String season = 'fall',
+  int seasonYear = 2026,
   String? releaseDay,
   String? releaseTime,
   String status = Watchlist.statusWatching,
@@ -14,8 +16,8 @@ WatchlistItem _makeItem({
     anime: Anime(
       id: id,
       title: title,
-      season: 'fall',
-      seasonYear: 2026,
+      season: season,
+      seasonYear: seasonYear,
       releaseDay: releaseDay,
       releaseTime: releaseTime,
       createdAt: '2026-10-01',
@@ -93,6 +95,100 @@ void main() {
       expect(schedule.first.day, 'Monday');
       expect(schedule.first.items.length, 1);
       expect(schedule.first.items.first.anime.title, 'Valid Day');
+    });
+
+    test('buildWeeklySchedule includes all watchlist statuses and filters by current season/year', () {
+      final items = [
+        _makeItem(
+          id: 1,
+          title: 'Planned Fall',
+          season: 'fall',
+          seasonYear: 2026,
+          releaseDay: 'Monday',
+          releaseTime: '18:00',
+          status: Watchlist.statusPlanned,
+        ),
+        _makeItem(
+          id: 2,
+          title: 'Watching Fall',
+          season: 'fall',
+          seasonYear: 2026,
+          releaseDay: 'Monday',
+          releaseTime: '19:00',
+          status: Watchlist.statusWatching,
+        ),
+        _makeItem(
+          id: 3,
+          title: 'Completed Fall',
+          season: 'fall',
+          seasonYear: 2026,
+          releaseDay: 'Monday',
+          releaseTime: '20:00',
+          status: Watchlist.statusCompleted,
+        ),
+        _makeItem(
+          id: 4,
+          title: 'Dropped Fall',
+          season: 'fall',
+          seasonYear: 2026,
+          releaseDay: 'Monday',
+          releaseTime: '21:00',
+          status: Watchlist.statusDropped,
+        ),
+        _makeItem(
+          id: 5,
+          title: 'Other Season Summer',
+          season: 'summer',
+          seasonYear: 2026,
+          releaseDay: 'Monday',
+          releaseTime: '17:00',
+          status: Watchlist.statusWatching,
+        ),
+        _makeItem(
+          id: 6,
+          title: 'Other Year Fall',
+          season: 'fall',
+          seasonYear: 2025,
+          releaseDay: 'Monday',
+          releaseTime: '16:00',
+          status: Watchlist.statusCompleted,
+        ),
+      ];
+
+      final schedule = buildWeeklySchedule(
+        items,
+        season: 'fall',
+        seasonYear: 2026,
+      );
+
+      expect(schedule.length, 1);
+      expect(
+        schedule.first.items.map((e) => e.anime.title).toList(),
+        ['Planned Fall', 'Watching Fall', 'Completed Fall', 'Dropped Fall'],
+      );
+    });
+
+    test('Anime.currentSeasonYear maps device dates consistently', () {
+      expect(
+        Anime.currentSeasonYear(DateTime(2026, 11, 27)),
+        (season: 'fall', year: 2026),
+      );
+      expect(
+        Anime.currentSeasonYear(DateTime(2027, 1, 15)),
+        (season: 'winter', year: 2027),
+      );
+      expect(
+        Anime.currentSeasonYear(DateTime(2027, 4, 1)),
+        (season: 'spring', year: 2027),
+      );
+      expect(
+        Anime.currentSeasonYear(DateTime(2027, 7, 10)),
+        (season: 'summer', year: 2027),
+      );
+      expect(
+        Anime.currentSeasonYear(DateTime(2027, 10, 5)),
+        (season: 'fall', year: 2027),
+      );
     });
   });
 }

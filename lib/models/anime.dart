@@ -44,6 +44,18 @@ class Anime {
     'Sunday',
   ];
 
+  static String seasonFromMonth(int month) {
+    if (month >= 1 && month <= 3) return 'winter';
+    if (month >= 4 && month <= 6) return 'spring';
+    if (month >= 7 && month <= 9) return 'summer';
+    return 'fall';
+  }
+
+  static ({String season, int year}) currentSeasonYear([DateTime? date]) {
+    final target = date ?? DateTime.now();
+    return (season: seasonFromMonth(target.month), year: target.year);
+  }
+
   String get seasonNameCapitalized {
     if (season.isEmpty) return '';
     return season[0].toUpperCase() + season.substring(1).toLowerCase();

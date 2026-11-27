@@ -41,9 +41,9 @@ class _SeasonsScreenState extends State<SeasonsScreen> {
   @override
   void initState() {
     super.initState();
-    final now = DateTime.now();
-    _currentYear = now.year;
-    _currentSeason = _getSeasonFromMonth(now.month);
+    final current = Anime.currentSeasonYear();
+    _currentYear = current.year;
+    _currentSeason = current.season;
     _loadData();
   }
 
@@ -59,13 +59,6 @@ class _SeasonsScreenState extends State<SeasonsScreen> {
     if (widget.refreshTick != oldWidget.refreshTick) {
       _loadData();
     }
-  }
-
-  String _getSeasonFromMonth(int month) {
-    if (month >= 1 && month <= 3) return 'winter';
-    if (month >= 4 && month <= 6) return 'spring';
-    if (month >= 7 && month <= 9) return 'summer';
-    return 'fall';
   }
 
   Future<void> _loadData() async {

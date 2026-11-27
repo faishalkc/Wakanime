@@ -38,10 +38,25 @@ int parseReleaseTimeMinutes(String? time) {
 
 /// Groups watchlist anime by release day (Monday -> Sunday) and sorts each day
 /// chronologically by release time, using title as a deterministic tie-breaker.
-List<DaySchedule> buildWeeklySchedule(List<WatchlistItem> watchlistItems) {
+/// When [season] and [seasonYear] are provided, only items matching that season
+/// and year are included.
+List<DaySchedule> buildWeeklySchedule(
+  List<WatchlistItem> watchlistItems, {
+  String? season,
+  int? seasonYear,
+}) {
   final grouped = <String, List<WatchlistItem>>{};
+  final targetSeason = season?.trim().toLowerCase();
 
   for (final item in watchlistItems) {
+    if (targetSeason != null &&
+        item.anime.season.toLowerCase() != targetSeason) {
+      continue;
+    }
+    if (seasonYear != null && item.anime.seasonYear != seasonYear) {
+      continue;
+    }
+
     final rawDay = item.anime.releaseDay?.trim();
     if (rawDay == null || rawDay.isEmpty) continue;
 
@@ -110,8 +125,16 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
       _isLoading = true;
     });
 
-    final watchlistItems = await _animeDao.getWatchlistItems();
-    final schedules = buildWeeklySchedule(watchlistItems);
+    final current = Anime.currentSeasonYear();
+    final watchlistItems = await _animeDao.getWatchlistItems(
+      season: current.season,
+      seasonYear: current.year,
+    );
+    final schedules = buildWeeklySchedule(
+      watchlistItems,
+      season: current.season,
+      seasonYear: current.year,
+    );
 
     if (mounted) {
       setState(() {
@@ -157,13 +180,13 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
                                 icon: Icons.schedule_outlined,
                                 title: 'No Scheduled Anime',
                                 message:
-                                    'None of your watchlist anime have a release day set yet.',
+                                    'None of your current season watchlist anime have a release day set yet.',
                               )
                             : const EmptyState(
                                 icon: Icons.event_busy_outlined,
-                                title: 'No Anime in Watchlist',
+                                title: 'No Watchlist Anime This Season',
                                 message:
-                                    'Add anime to your watchlist from Seasons to see their weekly release schedule.',
+                                    'Add current season anime to your watchlist from Seasons to see their weekly release schedule.',
                               ),
                       ),
                     ],
