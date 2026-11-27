@@ -3,6 +3,7 @@ import '../../database/anime_dao.dart';
 import '../../models/anime.dart';
 import '../../models/watchlist.dart';
 import '../../widgets/anime_card.dart';
+import '../../widgets/anime_search_field.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/season_selector.dart';
 import '../anime/add_anime_screen.dart';
@@ -22,10 +23,12 @@ class SeasonsScreen extends StatefulWidget {
 
 class _SeasonsScreenState extends State<SeasonsScreen> {
   final _animeDao = AnimeDao();
+  final _searchController = TextEditingController();
 
   late String _currentSeason;
   late int _currentYear;
 
+  String _searchQuery = '';
   List<Anime> _seasonalAnime = [];
   Map<int, Watchlist> _watchlistMap = {};
   bool _isLoading = true;
@@ -37,6 +40,12 @@ class _SeasonsScreenState extends State<SeasonsScreen> {
     _currentYear = now.year;
     _currentSeason = _getSeasonFromMonth(now.month);
     _loadData();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   @override
@@ -89,6 +98,19 @@ class _SeasonsScreenState extends State<SeasonsScreen> {
     _loadData();
   }
 
+  void _onSearchChanged(String query) {
+    setState(() {
+      _searchQuery = query;
+    });
+  }
+
+  void _clearSearch() {
+    _searchController.clear();
+    setState(() {
+      _searchQuery = '';
+    });
+  }
+
   Future<void> _navigateToAddAnime() async {
     final result = await Navigator.push<bool>(
       context,
@@ -119,6 +141,12 @@ class _SeasonsScreenState extends State<SeasonsScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final trimmedQuery = _searchQuery.trim().toLowerCase();
+    final filteredAnime = trimmedQuery.isEmpty
+        ? _seasonalAnime
+        : _seasonalAnime
+            .where((anime) => anime.title.toLowerCase().contains(trimmedQuery))
+            .toList();
 
     return Scaffold(
       appBar: AppBar(
@@ -127,69 +155,98 @@ class _SeasonsScreenState extends State<SeasonsScreen> {
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : RefreshIndicator(
-              onRefresh: _loadData,
-              child: ListView(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                children: [
-                  // Season Navigation Selector (← Season Year →)
-                  SeasonSelector(
-                    season: _currentSeason,
-                    year: _currentYear,
-                    onSeasonChanged: _onSeasonChanged,
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Seasonal Anime Section Header
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Seasonal Anime',
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        '${_seasonalAnime.length} Titles',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-
-                  // Seasonal Anime List or Empty State
-                  if (_seasonalAnime.isEmpty)
-                    EmptyState(
-                      icon: Icons.movie_filter_outlined,
-                      title: 'No Anime for This Season',
-                      message:
-                          'There is no anime recorded for ${_currentSeason[0].toUpperCase()}${_currentSeason.substring(1)} $_currentYear yet.',
-                      actionLabel: 'Add Anime',
-                      onAction: _navigateToAddAnime,
-                    )
-                  else
-                    ..._seasonalAnime.map((anime) {
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
-                        child: AnimeCard(
-                          anime: anime,
-                          watchlist: anime.id != null
-                              ? _watchlistMap[anime.id!]
-                              : null,
-                          onTap: () => _navigateToDetail(anime.id!),
-                        ),
-                      );
-                    }),
-
-                  const SizedBox(height: 80), // spacing for FAB
-                ],
-              ),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+            child: Column(
+              children: [
+                // Season Navigation Selector (← Season Year →)
+                SeasonSelector(
+                  season: _currentSeason,
+                  year: _currentYear,
+                  onSeasonChanged: _onSeasonChanged,
+                ),
+                const SizedBox(height: 12),
+                // Search Field
+                AnimeSearchField(
+                  controller: _searchController,
+                  query: _searchQuery,
+                  hintText: 'Search seasonal anime...',
+                  onChanged: _onSearchChanged,
+                  onClear: _clearSearch,
+                ),
+              ],
             ),
+          ),
+          Expanded(
+            child: _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : RefreshIndicator(
+                    onRefresh: _loadData,
+                    child: ListView(
+                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+                      children: [
+                        // Seasonal Anime Section Header
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Seasonal Anime',
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              '${filteredAnime.length} Titles',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+
+                        // Seasonal Anime List or Empty State
+                        if (_seasonalAnime.isEmpty)
+                          EmptyState(
+                            icon: Icons.movie_filter_outlined,
+                            title: 'No Anime for This Season',
+                            message:
+                                'There is no anime recorded for ${_currentSeason[0].toUpperCase()}${_currentSeason.substring(1)} $_currentYear yet.',
+                            actionLabel: 'Add Anime',
+                            onAction: _navigateToAddAnime,
+                          )
+                        else if (filteredAnime.isEmpty)
+                          EmptyState(
+                            icon: Icons.search_off_outlined,
+                            title: 'No Anime Found',
+                            message:
+                                'No anime in this season matches "${_searchQuery.trim()}".',
+                            actionLabel: 'Clear Search',
+                            onAction: _clearSearch,
+                          )
+                        else
+                          ...filteredAnime.map((anime) {
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 8),
+                              child: AnimeCard(
+                                anime: anime,
+                                watchlist: anime.id != null
+                                    ? _watchlistMap[anime.id!]
+                                    : null,
+                                onTap: () => _navigateToDetail(anime.id!),
+                              ),
+                            );
+                          }),
+
+                        const SizedBox(height: 80), // spacing for FAB
+                      ],
+                    ),
+                  ),
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: _navigateToAddAnime,
         tooltip: 'Add Anime',

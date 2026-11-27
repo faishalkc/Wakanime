@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../database/anime_dao.dart';
 import '../../models/watchlist.dart';
 import '../../widgets/anime_card.dart';
+import '../../widgets/anime_search_field.dart';
 import '../../widgets/empty_state.dart';
 import '../anime/anime_detail_screen.dart';
 
@@ -21,9 +22,11 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final _animeDao = AnimeDao();
+  final _searchController = TextEditingController();
 
   // Selected filter: 'all', 'planned', 'watching', 'completed', 'dropped'
   String _selectedFilter = 'all';
+  String _searchQuery = '';
   List<WatchlistItem> _items = [];
   bool _isLoading = true;
 
@@ -31,6 +34,12 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _loadWatchlist();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   @override
@@ -66,6 +75,19 @@ class _HomeScreenState extends State<HomeScreen> {
     _loadWatchlist();
   }
 
+  void _onSearchChanged(String query) {
+    setState(() {
+      _searchQuery = query;
+    });
+  }
+
+  void _clearSearch() {
+    _searchController.clear();
+    setState(() {
+      _searchQuery = '';
+    });
+  }
+
   Future<void> _navigateToDetail(int animeId) async {
     await Navigator.push(
       context,
@@ -86,6 +108,15 @@ class _HomeScreenState extends State<HomeScreen> {
       {'key': Watchlist.statusDropped, 'label': 'Dropped'},
     ];
 
+    final trimmedQuery = _searchQuery.trim().toLowerCase();
+    final filteredItems = trimmedQuery.isEmpty
+        ? _items
+        : _items
+            .where(
+              (item) => item.anime.title.toLowerCase().contains(trimmedQuery),
+            )
+            .toList();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -95,6 +126,18 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: Column(
         children: [
+          // Search Field
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+            child: AnimeSearchField(
+              controller: _searchController,
+              query: _searchQuery,
+              hintText: 'Search watchlist...',
+              onChanged: _onSearchChanged,
+              onClear: _clearSearch,
+            ),
+          ),
+
           // Filter Chips Horizontal Bar
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
@@ -119,30 +162,40 @@ class _HomeScreenState extends State<HomeScreen> {
           Expanded(
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
-                : _items.isEmpty
+                : filteredItems.isEmpty
                     ? RefreshIndicator(
                         onRefresh: _loadWatchlist,
                         child: ListView(
                           children: [
                             SizedBox(
-                              height: MediaQuery.of(context).size.height * 0.5,
-                              child: _selectedFilter == 'all'
-                                  ? EmptyState(
-                                      icon: Icons.playlist_add_check_outlined,
-                                      title: 'No Anime in Watchlist',
-                                      message:
-                                          'Your watchlist is empty. Add anime from Seasons to track them here.',
-                                      actionLabel:
-                                          widget.onNavigateToSeasons != null
-                                              ? 'Browse Seasons'
-                                              : null,
-                                      onAction: widget.onNavigateToSeasons,
-                                    )
+                              height: MediaQuery.of(context).size.height * 0.45,
+                              child: _items.isEmpty
+                                  ? (_selectedFilter == 'all'
+                                      ? EmptyState(
+                                          icon:
+                                              Icons.playlist_add_check_outlined,
+                                          title: 'No Anime in Watchlist',
+                                          message:
+                                              'Your watchlist is empty. Add anime from Seasons to track them here.',
+                                          actionLabel:
+                                              widget.onNavigateToSeasons != null
+                                                  ? 'Browse Seasons'
+                                                  : null,
+                                          onAction: widget.onNavigateToSeasons,
+                                        )
+                                      : EmptyState(
+                                          icon: Icons.filter_list_off_outlined,
+                                          title: 'No Anime Found',
+                                          message:
+                                              'No anime with status "${Watchlist.statusLabel(_selectedFilter)}".',
+                                        ))
                                   : EmptyState(
-                                      icon: Icons.filter_list_off_outlined,
+                                      icon: Icons.search_off_outlined,
                                       title: 'No Anime Found',
                                       message:
-                                          'No anime with status "${Watchlist.statusLabel(_selectedFilter)}".',
+                                          'No watchlist anime matches "${_searchQuery.trim()}".',
+                                      actionLabel: 'Clear Search',
+                                      onAction: _clearSearch,
                                     ),
                             ),
                           ],
@@ -155,9 +208,9 @@ class _HomeScreenState extends State<HomeScreen> {
                             horizontal: 16,
                             vertical: 12,
                           ),
-                          itemCount: _items.length,
+                          itemCount: filteredItems.length,
                           itemBuilder: (context, index) {
-                            final item = _items[index];
+                            final item = filteredItems[index];
                             return Padding(
                               padding: const EdgeInsets.only(bottom: 8),
                               child: AnimeCard(
