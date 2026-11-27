@@ -1,238 +1,233 @@
-# Wakanime
+<p align="center">
+  <img src="https://placehold.co/160x160" alt="Wakanime App Icon" width="160">
+</p>
 
-## Overview
+<h1 align="center">Wakanime</h1>
 
-Wakanime is an offline-first Android anime watchlist manager built with Flutter and Dart. It is designed primarily for personal use and published as an open-source project.
+<p align="center">
+  An offline-first anime watchlist manager for Android, built with Flutter &amp; SQLite.
+</p>
 
-All core data—anime entries, watchlist statuses, application settings, and poster images—is stored locally on the device using SQLite and local file storage. Wakanime also includes a manual **Import from API** option powered by Tenrai so you can populate a seasonal TV series catalog when online, then continue using the entire app completely offline.
+<p align="center">
+  <img src="https://img.shields.io/badge/Platform-Android-3DDC84?logo=android&logoColor=white" alt="Android">
+  <img src="https://img.shields.io/badge/Flutter-02569B?logo=flutter&logoColor=white" alt="Flutter">
+  <img src="https://img.shields.io/badge/Dart-0175C2?logo=dart&logoColor=white" alt="Dart">
+  <img src="https://img.shields.io/badge/SQLite-003B57?logo=sqlite&logoColor=white" alt="SQLite">
+  <img src="https://img.shields.io/badge/License-MIT-green.svg" alt="MIT License">
+</p>
 
-## Features
+---
 
-- **Offline Watchlist Management**: Add, view, edit, and remove anime entries from your personal watchlist without an internet connection.
-- **Watchlist Status Tracking**: Organize anime under four statuses: `Planned`, `Watching`, `Completed`, and `Dropped`.
-- **Alphabetical Watchlist & Filtering**: Filter your watchlist by status (`All`, `Planned`, `Watching`, `Completed`, `Dropped`) and search by title in real time (case-insensitive), sorted alphabetically by title.
-- **Seasonal Anime Browsing**: Browse anime by season (`Winter`, `Spring`, `Summer`, `Fall`) and year with previous/next season navigation and real-time title search.
-- **Weekly Release Schedule**: Automatically view a weekly (`Monday`–`Sunday`) release schedule for watchlisted anime from the current season and year, sorted chronologically by release time.
-- **Manual API Season Import**: Import full seasonal TV series catalogs from Tenrai into local SQLite storage with sequential pagination and local poster caching.
-- **Local Storage**: Persistent SQLite database (`wakanime.db`) for structured data and local application storage (`anime_images/`) for poster images, with graceful fallbacks if an image is missing.
-- **Appearance & Data Controls**: Switch between `System Default`, `Light Theme`, and `Dark Theme`, inspect database counts, or clear all local data from Settings.
+## 📱 Overview
 
-## Main Navigation
+Wakanime is a personal, open-source Android application for organizing your anime watchlist without relying on an internet connection or external user accounts.
 
-Wakanime uses a four-tab bottom navigation bar:
+All anime entries, watchlist statuses, preferences, and poster images live locally on your device using SQLite and local file storage. When you want to populate a seasonal TV catalog quickly, Wakanime provides an optional manual **Import from API** workflow via Tenrai—and once imported, everything continues working completely offline.
 
-- **Home**: Your main watchlist view, displaying watchlisted anime sorted alphabetically by title, with status filter chips and real-time title search.
-- **Seasons**: Browse anime by season and year, search within the active season, add anime manually, or trigger a manual Tenrai API import for the selected season.
-- **Schedule**: Weekly release schedule (`Monday` through `Sunday`) automatically filtered to anime that are both in your watchlist (across all statuses) and belong to the current season and year based on your device date.
-- **Settings**: Configure theme mode, view total anime and watchlist counts, clear all stored data, and check app version info.
+## ✨ Features
 
-## Requirements
+- 📋 **Personal Watchlist (Home)** — Manage watchlisted anime with four statuses (`Planned`, `Watching`, `Completed`, `Dropped`), status filter chips, alphabetical sorting, and real-time title search.
+- 🌸 **Seasonal Browsing (Seasons)** — Browse anime by season (`Winter`, `Spring`, `Summer`, `Fall`) and year using left/right navigation, with real-time title search within the active season.
+- 📅 **Weekly Schedule (Schedule)** — View a chronological `Monday`–`Sunday` release schedule for watchlisted anime belonging to the current season and year.
+- 📥 **Manual API Import** — Import a full season of TV series from Tenrai with sequential pagination and automatic local poster caching.
+- 💾 **Offline-First Local Storage** — Persistent SQLite database (`wakanime.db`) and local image storage (`anime_images/`), with safe placeholders if an image is unavailable.
+- 🎨 **Clean Material 3 UI** — Supports `System Default`, `Light Theme`, and `Dark Theme`, plus database statistics and data reset in Settings.
+
+### Main Navigation
+
+| Tab | Purpose |
+|---|---|
+| **Home** | Watchlist hub sorted alphabetically by title, with status filters and title search. |
+| **Seasons** | Seasonal catalog browser (`Winter` / `Spring` / `Summer` / `Fall` + year), manual entry, and Tenrai API import. |
+| **Schedule** | Weekly release schedule (`Monday`–`Sunday`) for watchlisted anime in the current season and year. |
+| **Settings** | Theme selection, stored anime/watchlist counts, data management, and app info. |
+
+## 📸 Screenshots
+
+> Note: Replace the placeholder URLs below with actual application screenshots.
+
+<table align="center">
+  <tr>
+    <td align="center">
+      <img src="https://placehold.co/300x600" alt="Home Screen" width="200">
+    </td>
+    <td align="center">
+      <img src="https://placehold.co/300x600" alt="Seasons Screen" width="200">
+    </td>
+    <td align="center">
+      <img src="https://placehold.co/300x600" alt="Schedule Screen" width="200">
+    </td>
+    <td align="center">
+      <img src="https://placehold.co/300x600" alt="Settings Screen" width="200">
+    </td>
+  </tr>
+  <tr>
+    <td align="center"><sub><b>Home</b></sub></td>
+    <td align="center"><sub><b>Seasons</b></sub></td>
+    <td align="center"><sub><b>Schedule</b></sub></td>
+    <td align="center"><sub><b>Settings</b></sub></td>
+  </tr>
+</table>
+
+## ⚙️ Requirements & Installation
+
+### Requirements
 
 - Flutter SDK (tested with Dart SDK `^3.13.1`)
-- Android SDK / Android emulator or physical Android device
+- Android SDK with a connected Android device or emulator
 
-Core dependencies used by the project:
+### Setup
 
-- `sqflite` — local SQLite database
-- `path_provider` & `path` — local storage paths for database and poster images
-- `image_picker` — selecting poster images from the device gallery
-
-## Installation
-
-1. Clone or download this repository and open the project root directory.
-2. Fetch Flutter dependencies:
+1. Clone or download this repository and navigate to the project root.
+2. Install dependencies:
 
    ```bash
    flutter pub get
    ```
 
-3. Run static analysis and tests to verify your environment:
+3. Verify with static analysis and tests:
 
    ```bash
    flutter analyze
    flutter test
    ```
 
-4. Launch the app on a connected Android device or emulator:
+4. Run on your Android device or emulator:
 
    ```bash
    flutter run
    ```
 
-## User Guide
+## 📖 User Guide
 
-### Adding an Anime Manually
+### 🏠 Home
 
-1. Open the **Seasons** tab.
-2. Tap **Add Anime** (or the `+` floating action button).
-3. Enter the required **Title**, select the **Season** (`Winter`, `Spring`, `Summer`, `Fall`) and **Year**, and optionally select an image, **Release Day**, **Release Time**, and **Platform**.
-4. Tap **Save Anime**.
+- View every anime you have added to your watchlist, sorted alphabetically by title.
+- Filter entries using the status chips (`All`, `Planned`, `Watching`, `Completed`, `Dropped`).
+- Use the search bar to filter watchlisted titles in real time alongside your active status filter.
+- Tap any card to open **Anime Details** and update or remove its watchlist status.
 
-### Managing Watchlist Status
+### 🌸 Seasons
 
-1. Tap any anime card from **Home**, **Seasons**, or **Schedule** to open **Anime Details**.
-2. Tap **Add to Watchlist** (or **Update Watchlist Status** if already added).
-3. Choose one of the four statuses:
-   - **Planned** (`planned`)
-   - **Watching** (`watching`)
-   - **Completed** (`completed`)
-   - **Dropped** (`dropped`)
-4. To remove an anime from your watchlist without deleting its catalog entry or image, select **Remove from Watchlist** in the bottom sheet.
+- Opens to the current season and year by default.
+- Use `←` and `→` on the season selector to move across seasons and years (for example, `Fall 2026` → `Winter 2027`).
+- Search titles within the currently selected season using the search bar.
+- Tap **Add Anime** (or `+`) to enter an anime manually (`Title`, optional poster image, `Season`, `Year`, `Release Day`, `Release Time`, `Platform`).
 
-### Browsing Seasons
+### 📥 Importing Anime
 
-1. Open the **Seasons** tab (defaults to the current season and year).
-2. Use the left (`←`) and right (`→`) buttons on the season selector to navigate across seasons and years (for example, `Fall 2026` → `Winter 2027`).
-3. Use the search bar below the selector to filter titles within the currently selected season.
-
-### Importing a Season from Tenrai
-
-1. Open the **Seasons** tab and navigate to the season and year you want to import.
+1. Open **Seasons** and select the season and year you want to import.
 2. Tap **Import from API**.
-3. Wait for pagination, image staging, and local database saving to complete.
-4. Once finished, the imported TV series appear in **Seasons** and remain available offline.
+3. Wait while Wakanime fetches all TV series pages, stages poster images, and saves them to SQLite.
+4. Imported anime appear in **Seasons** immediately and remain available offline.
 
-### Viewing the Weekly Schedule
+### 📅 Schedule
 
-1. Open the **Schedule** tab.
-2. Watchlisted anime for the current season and year are grouped by release day (`Monday` to `Sunday`) and ordered chronologically by release time (`HH:mm`).
-3. Tap any entry to open **Anime Details**.
+- Automatically displays watchlisted anime for the **current season and year** (determined from your device date).
+- Includes all watchlist statuses (`Planned`, `Watching`, `Completed`, `Dropped`).
+- Groups anime by release day (`Monday` to `Sunday`) and sorts each day chronologically by release time (`HH:mm`).
+- Entries without a release day are omitted safely without errors.
 
-### Editing or Deleting an Anime
+### ✏️ Editing & Deleting Anime
 
-1. Open **Anime Details** for any anime.
-2. Tap the **Edit** icon in the top bar to update its title, poster image, season, year, release day, release time, or platform. Replacing or removing an image cleans up the old local image file automatically.
-3. Tap the **Delete** icon in the top bar and confirm to permanently delete the anime, its watchlist entry (if any), and its local image file.
+- Open **Anime Details** from **Home**, **Seasons**, or **Schedule**.
+- Tap the **Edit** icon to update metadata or replace/remove the poster image (old local image files are cleaned up automatically).
+- Tap the **Delete** icon and confirm to remove the anime, its linked watchlist entry, and its local poster image.
 
-## API Import
+## 🌐 API Import
 
-Wakanime uses **Tenrai** (`https://api.tenrai.org/v1/seasons/{year}/{season}`) strictly as a manual, one-shot import mechanism—never as a runtime backend.
+Wakanime integrates **Tenrai** (`https://api.tenrai.org/v1/seasons/{year}/{season}`) strictly as a manual import tool—not a runtime backend.
 
 ```text
 Select season/year in Seasons
         ↓
 Tap "Import from API"
         ↓
-Fetch TV series pages sequentially from Tenrai (?type=tv&filter=tv)
+Fetch TV series pages sequentially (?type=tv&filter=tv)
         ↓
 Stage poster images locally
         ↓
-Atomic SQLite upsert (preserve platform & watchlist)
+Atomic SQLite upsert
         ↓
-Use Wakanime offline
+Use Wakanime completely offline
 ```
 
-Key import behaviors:
+Key guarantees:
 
-- **TV Series Only**: Requests filter for TV series (`type=tv` and `filter=tv`), and non-TV entries are excluded.
-- **Full Sequential Pagination**: Automatically fetches all pages (`has_next_page`, `current_page`, `last_visible_page`) with rate-limit (`HTTP 429` / `Retry-After`) handling.
-- **Atomic Database Transaction**: All pages are fetched before any SQLite transaction runs. If a critical API or pagination error occurs, the import aborts and existing local data remains untouched.
-- **Upsert by External Identity**: Imported records use `source = "tenrai"` and `external_id = mal_id`. Re-importing updates metadata (`title`, `season`, `season_year`, `release_day`, `release_time`, and poster image) without creating duplicates.
-- **Preserves Local Data**:
-  - `platform` is left empty on new imports and never overwritten on re-import.
-  - Existing `watchlist` records and statuses are never modified or created automatically by an import.
-  - Anime that disappear from later API responses are not deleted from SQLite.
-  - Manually created anime (`source = null`, `external_id = null`) remain separate and do not collide with imported entries.
-- **Resilient Image Handling**: Individual poster download failures do not abort a season import. New entries fall back to a placeholder if the image fails, and existing entries retain their previous local image if the new download fails.
+- **TV Series Only**: Queries Tenrai for TV series (`type=tv` and `filter=tv`) and skips non-TV entries.
+- **Full Pagination & Rate-Limit Handling**: Fetches every page (`has_next_page`, `current_page`, `last_visible_page`) sequentially and respects `HTTP 429` `Retry-After` headers.
+- **Atomic Import**: Fetches all pages before opening a single SQLite transaction. If a critical API or pagination failure occurs, existing data is left untouched.
+- **Safe Re-Import (Upsert)**: Matches API records by `(source, external_id)` (`"tenrai"` + `mal_id`), updating metadata and posters without creating duplicates or removing titles absent from later responses.
+- **Preserves Local Data**: Never overwrites user-entered `platform`, never modifies or auto-creates `watchlist` records, keeps existing images if a new download fails, and keeps manual entries (`source = null`, `external_id = null`) independent.
 
-## Offline Behavior & Data & Privacy
+## 🔒 Data & Privacy
 
-- **100% Local Storage**: All structured data resides in a local SQLite database (`wakanime.db`), and poster images are stored locally inside the app's documents directory (`anime_images/`).
-- **No Accounts or Cloud**: Wakanime has no user account system, no backend server, no cloud synchronization, and no telemetry or analytics.
-- **Network Usage**: The app only accesses the internet when you explicitly tap **Import from API** on the **Seasons** screen (to fetch Tenrai season data and download poster images). Normal browsing across **Home**, **Seasons**, **Schedule**, **Settings**, and **Anime Details** works entirely offline.
+- 💾 **Local Database**: Structured data (`anime`, `watchlist`, `settings`) is stored locally in `wakanime.db` via SQLite.
+- 🖼️ **Local Images**: Poster images are stored locally inside the app's `anime_images` directory.
+- 🚫 **No Accounts or Cloud**: No login, no backend server, no cloud sync, and no tracking or analytics.
+- 📡 **Offline by Default**: Internet access is used only when you explicitly tap **Import from API** on the **Seasons** screen.
 
-## Project Structure
+## 📁 Project Structure
 
 ```text
 lib/
-├── main.dart
-├── app/
-│   ├── app.dart
-│   └── routes.dart
-├── database/
-│   ├── anime_dao.dart
-│   └── database.dart
-├── models/
-│   ├── anime.dart
-│   ├── anime_import_data.dart
-│   └── watchlist.dart
-├── screens/
-│   ├── anime/
-│   │   ├── add_anime_screen.dart
-│   │   ├── anime_detail_screen.dart
-│   │   └── edit_anime_screen.dart
-│   ├── home/
-│   │   └── home_screen.dart
-│   ├── schedule/
-│   │   └── schedule_screen.dart
-│   ├── seasons/
-│   │   └── seasons_screen.dart
-│   └── settings/
-│       └── settings_screen.dart
-├── services/
-│   ├── image_service.dart
-│   ├── season_import_service.dart
-│   └── tenrai_provider.dart
-└── widgets/
-    ├── anime_card.dart
-    ├── anime_search_field.dart
-    ├── empty_state.dart
-    └── season_selector.dart
+├── main.dart                  # App entry point and initial theme loading
+├── app/                       # MaterialApp shell, theme config, and routes
+├── database/                  # SQLite initialization, migrations, and AnimeDao
+├── models/                    # Anime, Watchlist, and AnimeImportData models
+├── screens/                   # Home, Seasons, Schedule, Settings, and Anime CRUD screens
+├── services/                  # Local image lifecycle, Tenrai provider, and season importer
+└── widgets/                   # Reusable AnimeCard, search field, season selector, empty state
 
-test/
-├── schedule_test.dart
-├── search_test.dart
-├── season_import_test.dart
-├── season_selector_test.dart
-└── widget_test.dart
+test/                          # Unit and widget tests
 ```
 
-## FAQ
+## ❓ FAQ
 
 ### What is Wakanime?
-Wakanime is an offline-first Android application built with Flutter and SQLite for managing a personal anime watchlist, browsing seasonal catalogs, and viewing weekly release schedules.
+Wakanime is an offline-first Android anime watchlist manager built with Flutter and SQLite for personal use.
 
 ### Does Wakanime require an internet connection?
-No. All normal features—viewing your watchlist, browsing saved seasons, checking the weekly schedule, and adding/editing/deleting anime—work completely offline. An internet connection is only needed when you manually tap **Import from API**.
+No. Browsing your watchlist, seasons, schedule, and managing anime details all work offline. Internet is only required when you manually tap **Import from API**.
 
 ### What is the difference between Home and Seasons?
-**Home** displays only the anime you have added to your personal watchlist (sorted alphabetically, with status filters and title search). **Seasons** is your seasonal catalog browser, allowing you to switch between seasons/years, search within a season, add anime manually, or import a season from Tenrai.
+**Home** shows only anime in your watchlist (sorted alphabetically, with status filters and title search). **Seasons** shows the seasonal anime catalog where you can switch seasons/years, add anime manually, or import TV series from Tenrai.
 
 ### How does Schedule decide which anime to display?
-**Schedule** queries your local SQLite database for anime that meet two conditions:
-1. They have an entry in the `watchlist` table.
-2. Their `season` and `season_year` match the current season and year based on your device date (`Jan–Mar` = Winter, `Apr–Jun` = Spring, `Jul–Sep` = Summer, `Oct–Dec` = Fall).
-
-It then groups matching entries by `release_day` (`Monday`–`Sunday`) and sorts them chronologically by `release_time`.
+**Schedule** queries local SQLite for anime that both have a `watchlist` record and match the current season and year based on your device date (`Jan–Mar` = Winter, `Apr–Jun` = Spring, `Jul–Sep` = Summer, `Oct–Dec` = Fall), then groups them by `release_day` (`Monday`–`Sunday`) and sorts by `release_time`.
 
 ### Does Schedule include all watchlist statuses?
-Yes. Any anime with a `watchlist` record in the current season and year appears in **Schedule**, regardless of whether its status is `Planned`, `Watching`, `Completed`, or `Dropped`.
+Yes. Watchlisted anime in the current season and year appear in **Schedule** regardless of whether their status is `Planned`, `Watching`, `Completed`, or `Dropped`.
 
 ### What does API Import do?
-It fetches TV series for the currently selected season and year from the Tenrai API across all pagination pages, downloads available poster images to local storage, and performs an atomic upsert into your local SQLite database.
+It fetches TV series for the currently selected season and year across all Tenrai pagination pages, downloads available poster images locally, and upserts them into SQLite inside an atomic transaction.
 
 ### Does importing anime automatically add it to the watchlist?
-No. Imported anime are saved only to the `anime` catalog table so they appear in **Seasons**. You choose which titles to add to your watchlist.
+No. Imported anime are added only to the local `anime` catalog in **Seasons** so you can decide which titles to add to your watchlist.
 
 ### Does importing data change the watchlist status?
-No. Re-importing a season updates anime metadata from Tenrai while preserving your existing `watchlist` entries, statuses, and manually entered `platform` values.
+No. Re-importing updates anime metadata while preserving your existing `watchlist` entries, statuses, and manually set `platform` values.
 
 ### Why is an anime not appearing in Schedule?
-An anime will not appear in **Schedule** if any of the following apply:
-- It has not been added to your watchlist.
-- Its `season` and `season_year` do not match the current season and year.
-- It does not have a valid `release_day` (`Monday`–`Sunday`) set (for example, movies or series without broadcast day metadata).
+An anime will not appear in **Schedule** if it is not in your watchlist, belongs to a different season or year, or does not have a valid `release_day` (`Monday`–`Sunday`).
 
 ### Can Wakanime be used without API import?
-Yes. You can add, edit, and manage all anime and poster images completely manually through the **Add Anime** form without ever using API import.
+Yes. You can add, edit, and manage all anime and poster images manually via **Add Anime**.
 
 ### Where is anime data stored?
-Structured data (anime metadata, watchlist statuses, and settings) is stored locally in `wakanime.db` via SQLite, and poster images are stored locally inside the application's `anime_images` directory.
+Metadata, watchlist entries, and settings are stored in `wakanime.db` (SQLite), and poster images are stored locally in the app's `anime_images` directory.
 
-## Contributing
+## 🤝 Contributing
 
-Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) before opening an issue or pull request.
+Contributions are welcome! Please review [CONTRIBUTING.md](CONTRIBUTING.md) and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) before opening an issue or pull request.
 
-## License
+## 📄 License
 
-This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
+This project is licensed under the MIT License — see [LICENSE](LICENSE) for details.
+
+---
+
+<p align="center">
+  Made with Flutter and a love for anime. 🌸<br>
+  Licensed under the MIT License.
+</p>
